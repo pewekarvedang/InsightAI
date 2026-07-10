@@ -56,6 +56,57 @@ async def upload_dataset(file: UploadFile = File(...)):
                 "maximum": round(float(dataframe[column].max()), 2)
             }
 
+            business_insights = {}
+
+        if "sales" in dataframe.columns:
+            business_insights["total_revenue"] = round(
+                float(dataframe["sales"].sum()), 2
+            )
+
+            business_insights["average_sale"] = round(
+                float(dataframe["sales"].mean()), 2
+            )
+
+            business_insights["highest_sale"] = round(
+                float(dataframe["sales"].max()), 2
+            )
+
+        if "product" in dataframe.columns and "sales" in dataframe.columns:
+            product_sales = dataframe.groupby(
+                "product"
+            )["sales"].sum()
+
+            business_insights["top_product"] = {
+                "name": str(product_sales.idxmax()),
+                "total_sales": round(
+                    float(product_sales.max()), 2
+                )
+            }
+
+        if "category" in dataframe.columns and "sales" in dataframe.columns:
+            category_sales = dataframe.groupby(
+                "category"
+            )["sales"].sum()
+
+            business_insights["best_category"] = {
+                "name": str(category_sales.idxmax()),
+                "total_sales": round(
+                    float(category_sales.max()), 2
+                )
+            }
+
+        if "region" in dataframe.columns and "sales" in dataframe.columns:
+            region_sales = dataframe.groupby(
+                "region"
+            )["sales"].sum()
+
+            business_insights["top_region"] = {
+                "name": str(region_sales.idxmax()),
+                "total_sales": round(
+                    float(region_sales.max()), 2
+                )
+            }
+
         return {
             "message": "Dataset uploaded and analyzed successfully",
 
@@ -86,6 +137,8 @@ async def upload_dataset(file: UploadFile = File(...)):
             },
 
             "numeric_summary": numeric_summary,
+
+            "business_insights": business_insights,
 
             "preview": dataframe.head(5).fillna("").to_dict(
                 orient="records"
