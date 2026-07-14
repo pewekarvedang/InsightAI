@@ -1,0 +1,9 @@
+date,product,category,sales,quantity,region
+2026-07-01,Laptop,Electronics,65000,1,Mumbai
+2026-07-02,Mouse,Accessories,1500,3,Pune
+2026-07-03,Keyboard,Accessories,3200,2,Mumbai
+2026-07-04,Monitor,Electronics,18000,1,Delhi
+2026-07-05,Headphones,Accessories,4500,2,Bengaluru
+2026-07-06,Laptop,Electronics,72000,1,Pune
+2026-07-07,Mouse,Accessories,1000,2,Mumbai
+2026-07-08,Monitor,Electronics,20000,1,Bengaluru
