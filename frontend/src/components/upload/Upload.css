@@ -1,0 +1,47 @@
+.upload-card{
+    background:white;
+    padding:30px;
+    border-radius:16px;
+    box-shadow:0 6px 18px rgba(0,0,0,.08);
+
+    margin-bottom:30px;
+
+    text-align:center;
+}
+
+.upload-card h2{
+    margin-bottom:10px;
+}
+
+.upload-card p{
+    color:#666;
+    margin-bottom:20px;
+}
+
+.upload-card input{
+    margin-bottom:15px;
+}
+
+.upload-card button{
+
+    background:#2563eb;
+    color:white;
+
+    border:none;
+
+    padding:12px 25px;
+
+    border-radius:10px;
+
+    cursor:pointer;
+
+    font-size:16px;
+
+    transition:.3s;
+}
+
+.upload-card button:hover{
+
+    background:#1d4ed8;
+
+}

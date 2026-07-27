@@ -1,0 +1,7 @@
+order_id,product,region,sales,profit
+1001,Laptop,Mumbai,65000.0,8000
+1002,Mouse,Pune,1200.0,300
+1003,Keyboard,Mumbai,2500.0,600
+1004,Monitor,Navi Mumbai,18000.0,2500
+1005,Laptop,Pune,68000.0,8500
+1006,Mouse,Mumbai,18000.0,250

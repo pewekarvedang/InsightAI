@@ -1,19 +1,25 @@
-# Python virtual environment
+# Python
 backend/venv/
-
-# Python cache files
 __pycache__/
 *.pyc
 
-# Environment variables and API keys
+# Node
+frontend/node_modules/
+
+# Environment
 .env
 
-# VS Code settings
-.vscode/
-
-# Uploaded datasets
+# Uploaded files
 uploads/
+backend/uploads/
 
-# Operating system files
+# Logs
+*.log
+
+# OS
 .DS_Store
 Thumbs.db
+
+# IDE
+.vscode/
+.idea/

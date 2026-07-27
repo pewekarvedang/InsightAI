@@ -1,0 +1,19 @@
+.container {
+    width: 95%;
+    max-width: 1400px;
+    margin: auto;
+    padding: 30px;
+}
+
+.section-title {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.card {
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 5px 15px rgba(0,0,0,.08);
+    padding: 20px;
+}
