@@ -7,7 +7,7 @@ import Button from "@mui/material/Button";
 
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 
-export default function Upload({ setDashboard }) {
+export default function Upload({ setDashboard, setAiReport }) {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -21,8 +21,9 @@ export default function Upload({ setDashboard }) {
 
     try {
       const response = await api.post("/dashboard", formData);
-
+      
       setDashboard(response.data.dashboard);
+      setAiReport(response.data.ai_report);
 
     } catch (err) {
     console.error(err);
@@ -110,8 +111,7 @@ disabled={loading}
 </Paper>
 
 );
-
-return (
+(
 
 <Paper
     elevation={3}

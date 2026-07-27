@@ -1,17 +1,19 @@
 # Python
-backend/venv/
+venv/
 __pycache__/
 *.pyc
+*.pyo
 
 # Node
-frontend/node_modules/
+node_modules/
+dist/
 
 # Environment
 .env
+.env.*
 
-# Uploaded files
-uploads/
-backend/uploads/
+# VS Code
+.vscode/
 
 # Logs
 *.log
@@ -20,6 +22,11 @@ backend/uploads/
 .DS_Store
 Thumbs.db
 
-# IDE
-.vscode/
-.idea/
+# Python cache
+.pytest_cache/
+
+# Build
+build/
+
+# Uploaded files (optional)
+uploads/

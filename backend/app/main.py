@@ -19,6 +19,8 @@ from app.services.dashboard_service import generate_dashboard
 
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.ai.analyzer import generate_ai_report
+
 app = FastAPI(
     title="InsightAI API",
     description="Backend API for the AI-powered Business Intelligence Platform",
@@ -189,7 +191,6 @@ async def dashboard(file: UploadFile = File(...)):
         )
 
     try:
-
         saved_file = save_uploaded_file(file)
 
         if saved_file.suffix == ".csv":
@@ -199,9 +200,13 @@ async def dashboard(file: UploadFile = File(...)):
 
         dashboard = generate_dashboard(dataframe)
 
+        # Generate AI report
+        ai_report = generate_ai_report(dashboard)
+
         return {
             "message": "Dashboard generated successfully",
-            "dashboard": dashboard
+            "dashboard": dashboard,
+            "ai_report": ai_report
         }
 
     except Exception as e:
@@ -209,3 +214,22 @@ async def dashboard(file: UploadFile = File(...)):
             status_code=400,
             detail=str(e)
         )
+
+    @app.post("/ai/analyze")
+    async def ai_analyze(file: UploadFile = File(...)):
+
+        saved_file = save_uploaded_file(file)
+
+    if saved_file.suffix == ".csv":
+        dataframe = pd.read_csv(saved_file)
+    else:
+        dataframe = pd.read_excel(saved_file)
+
+    dashboard = generate_dashboard(dataframe)
+
+    report = generate_ai_report(dashboard)
+
+    return {
+        "dashboard": dashboard,
+        "ai_report": report
+    }
