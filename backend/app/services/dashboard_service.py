@@ -1,68 +1,52 @@
 import pandas as pd
 
+from .data_profiler import profile_dataset
+
 
 def generate_dashboard(df: pd.DataFrame):
 
+    profile = profile_dataset(df)
+
     dashboard = {}
 
-    dashboard["total_orders"] = len(df)
+    dashboard["summary"] = profile
 
-    dashboard["total_revenue"] = float(df["Sales"].sum())
+    dashboard["numeric_summary"] = {}
 
-    dashboard["total_profit"] = float(df["Profit"].sum())
+    for column in profile["numeric_columns"]:
 
-    dashboard["average_order_value"] = float(df["Sales"].mean())
+        dashboard["numeric_summary"][column] = {
 
-    dashboard["top_product"] = (
-        df.groupby("Product")["Sales"]
-        .sum()
-        .idxmax()
-    )
+            "sum": float(df[column].sum()),
 
-    dashboard["top_region"] = (
-        df.groupby("Region")["Sales"]
-        .sum()
-        .idxmax()
-    )
+            "mean": float(df[column].mean()),
 
-    dashboard["sales_by_product"] = (
-        df.groupby("Product", as_index=False)["Sales"]
-        .sum()
-        .rename(columns={
-            "Product": "name",
-            "Sales": "sales"
-        })
-        .to_dict(orient="records")
-    )
+            "min": float(df[column].min()),
 
-    dashboard["profit_by_product"] = (
-        df.groupby("Product", as_index=False)["Profit"]
-        .sum()
-        .rename(columns={
-            "Product": "name",
-            "Profit": "profit"
-        })
-        .to_dict(orient="records")
-    )
+            "max": float(df[column].max())
+        }
 
-    dashboard["sales_by_region"] = (
-        df.groupby("Region", as_index=False)["Sales"]
-        .sum()
-        .rename(columns={
-            "Region": "name",
-            "Sales": "sales"
-        })
-        .to_dict(orient="records")
-    )
+    dashboard["top_categories"] = {}
 
-    dashboard["profit_by_region"] = (
-        df.groupby("Region", as_index=False)["Profit"]
-        .sum()
-        .rename(columns={
-            "Region": "name",
-            "Profit": "profit"
-        })
-        .to_dict(orient="records")
-    )
+    for column in profile["categorical_columns"]:
+
+        dashboard["top_categories"][column] = (
+
+            df[column]
+
+            .value_counts()
+
+            .head(10)
+
+            .reset_index()
+
+            .rename(columns={
+                "index": "name",
+                column: "value"
+            })
+
+            .to_dict(orient="records")
+
+        )
 
     return dashboard
