@@ -12,32 +12,39 @@ export default function Upload({ setDashboard, setAiReport }) {
   const [loading, setLoading] = useState(false);
 
   async function handleUpload() {
-    if (!file) return;
+  if (!file) {
+    alert("Please select a file.");
+    return;
+  }
 
-    const formData = new FormData();
-    formData.append("file", file);
+  // Validate file extension
+  const fileName = file.name.toLowerCase();
 
-    setLoading(true);
+  if (
+    !fileName.endsWith(".csv") &&
+    !fileName.endsWith(".xlsx")
+  ) {
+    alert("Please upload a CSV or Excel (.xlsx) file.");
+    return;
+  }
 
-    try {
-      const response = await api.post("/dashboard", formData);
-      
-      setDashboard(response.data.dashboard);
-      setAiReport(response.data.ai_report);
+  const formData = new FormData();
+  formData.append("file", file);
 
-    } catch (err) {
-    console.error(err);
+  setLoading(true);
 
-    if (err.response) {
-        console.log(err.response.data);
-        alert(err.response.data.detail);
-    } else {
-        alert("Upload Failed");
-    }
-}
+  try {
+    const response = await api.post("/dashboard", formData);
 
+    setDashboard(response.data.dashboard);
+    setAiReport(response.data.ai_report);
+  } catch (error) {
+    console.error(error);
+    alert("Upload failed");
+  } finally {
     setLoading(false);
   }
+}
 
 return (
 
