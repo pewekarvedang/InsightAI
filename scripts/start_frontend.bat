@@ -1,5 +1,5 @@
 @echo off
-cd /d D:\InsightAI\frontend
+cd /d "%~dp0..\frontend"
 
 npm run dev
 

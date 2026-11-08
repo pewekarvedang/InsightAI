@@ -1,0 +1,106 @@
+from .llm import ask_gemma
+from .prompts import business_prompt
+
+
+def generate_structured_analytical_report(metrics: dict) -> str:
+    """Generate a high-level executive report grounded in dataset metrics when local LLM is offline."""
+    rev = metrics.get("total_revenue", 0)
+    profit = metrics.get("total_profit")
+    profit_label = metrics.get("profit_label") or "Net Profit"
+    margin = metrics.get("profit_margin_pct")
+    orders = metrics.get("total_orders", 0)
+    aov = metrics.get("average_order_value", 0)
+    top_p = metrics.get("top_product", "N/A")
+    top_r = metrics.get("top_region", "N/A")
+    top_c = metrics.get("top_category", "N/A")
+    swot = metrics.get("swot_analysis", {})
+    anomalies = metrics.get("anomalies", [])
+    mode = metrics.get("metric_mode", "currency")
+
+    prods = metrics.get("sales_by_product", [])
+
+    if mode == "volume":
+        prod_highlights = ", ".join(f"{p['name']} ({p['sales']} entries)" for p in prods[:3]) if prods else "N/A"
+        report = f"""### 1. Executive Summary
+InsightAI has completed an algorithmic business intelligence audit of the uploaded dataset. A total of **{orders}** catalog/ledger records were processed across active master dimensions. The dataset demonstrates clear segmentation anchored primarily by lead entity **{top_p}** and primary territory **{top_r}**.
+
+### 2. Catalog & Distribution Audit
+- **Total Master Entries**: {orders} records
+- **Primary Entity Anchor**: {top_p}
+- **Primary Geographic Territory**: {top_r}
+- **Key Classification**: {top_c}
+- **Catalog Concentration**: Leading 3 entities ({prod_highlights}) represent the primary operational focus.
+
+### 3. Core Growth Drivers
+- **Entity Leadership**: **{top_p}** represents the dominant master record entity.
+- **Regional Footprint**: **{top_r}** commands the highest volume of registered records.
+"""
+    else:
+        prod_highlights = ", ".join(f"{p['name']} (₹{p['sales']:,.2f})" for p in prods[:3]) if prods else "N/A"
+        profit_summary = f"Net profit generated is **₹{profit:,.2f}** ({profit_label}), reflecting an overall margin of **{margin}%**." if profit is not None else "Financial transactions show steady turnover volume across catalog items."
+
+        report = f"""### 1. Executive Summary
+InsightAI has completed an algorithmic business intelligence audit of the uploaded dataset. Overall revenue stands at **₹{rev:,.2f}** across **{orders}** recorded transactions with an average order value (AOV) of **₹{aov:,.2f}**. {profit_summary} The business exhibits healthy traction anchored primarily by top performer **{top_p}** and leading territory **{top_r}**.
+
+### 2. Financial & Performance Analysis
+- **Total Revenue**: ₹{rev:,.2f}
+"""
+        if profit is not None:
+            report += f"- **{profit_label}**: ₹{profit:,.2f}\n"
+            report += f"- **Profit Margin**: {margin}% ({'Robust / High-Yield' if margin and margin >= 15 else 'Standard Operating' if margin and margin >= 8 else 'Compressed / Margin Pressure'})\n"
+        report += f"""- **Average Order Value (AOV)**: ₹{aov:,.2f}
+- **Revenue Concentration**: Leading 3 products ({prod_highlights}) represent the dominant share of turnover.
+
+### 3. Core Growth Drivers
+- **Product Anchor**: **{top_p}** is the primary cash driver for the portfolio.
+- **Regional Strength**: **{top_r}** commands the highest consumer demand and distribution volume.
+"""
+
+    if top_c and top_c != "N/A":
+        report += f"- **Key Category**: Category segment **{top_c}** demonstrates the highest product concentration and turnover velocity.\n"
+
+    report += f"""
+### 4. SWOT Evaluation
+**Strengths:**
+{chr(10).join(f"- {s}" for s in swot.get('strengths', ['Solid top-line revenue traction.']))}
+
+**Weaknesses:**
+{chr(10).join(f"- {w}" for w in swot.get('weaknesses', ['Regional concentration risk.']))}
+
+**Opportunities:**
+{chr(10).join(f"- {o}" for o in swot.get('opportunities', ['Geographic expansion into secondary regions.']))}
+
+**Threats:**
+{chr(10).join(f"- {t}" for t in swot.get('threats', ['Margin compression due to cost increases.']))}
+"""
+
+    if anomalies:
+        report += f"""
+### 5. Risk Factors & Operational Anomalies
+{chr(10).join(f"- **{a['title']}**: {a['description']}" for a in anomalies)}
+"""
+
+    report += f"""
+### 6. Strategic Recommendations
+1. **Capitalize on Product Leadership**: Increase cross-sell attach rates for accessories and complementary items around **{top_p}** to lift AOV above ₹{aov:,.2f}.
+2. **Expand Under-Penetrated Markets**: Reallocate 15-20% of acquisition budget to replicate regional playbooks from **{top_r}** into emerging territories.
+3. **Protect Operating Margins**: Audit cost-of-goods and discontinue steep price discounting on low-margin SKUs to maintain profit margins above 15%.
+4. **Data-Driven Retention**: Implement tiered rewards for high-frequency buyers to drive recurring transaction volume.
+
+*(Generated by InsightAI Executive Analytical Intelligence Engine)*
+"""
+    return report.strip()
+
+
+def generate_ai_report(metrics: dict) -> str:
+    """Generate executive AI business report.
+    Uses local Ollama Gemma 3 if available; seamlessly falls back to the structured analytical report engine.
+    """
+    prompt = business_prompt(metrics)
+    llm_output = ask_gemma(prompt)
+
+    # Check if Ollama failed or returned the fallback message
+    if not llm_output or "AI report unavailable" in llm_output or "Could not connect to Ollama" in llm_output:
+        return generate_structured_analytical_report(metrics)
+
+    return llm_output

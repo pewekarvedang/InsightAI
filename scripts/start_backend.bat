@@ -1,5 +1,5 @@
 @echo off
-cd /d D:\InsightAI\backend
+cd /d "%~dp0.."
 
 call venv\Scripts\activate
 

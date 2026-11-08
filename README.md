@@ -50,22 +50,21 @@ InsightAI is an AI-powered Business Intelligence Platform that enables users to 
 ```
 InsightAI
 │
-├── backend
-│   ├── app
-│   │   ├── services
-│   │   ├── utils
-│   │   └── main.py
-│   └── requirements.txt
-│
-├── frontend
-│   ├── src
-│   │   ├── components
-│   │   ├── pages
-│   │   ├── services
-│   │   └── theme
+├── app/                  # FastAPI backend
+│   ├── ai/               # Gemma LLM & Business Analyst prompts
+│   ├── services/         # Dashboard metrics, data cleaner, data profiler
+│   ├── utils/            # Upload & file management
+│   └── main.py           # API endpoints & CORS middleware
+├── frontend/             # React (Vite + Material UI + Recharts)
+│   ├── src/
+│   │   ├── components/   # Dashboard, charts, upload, profiling & cleaning
+│   │   ├── pages/        # Dashboard layout page
+│   │   ├── services/     # Axios API client
+│   │   └── theme/        # Custom MUI theme
 │   └── package.json
-│
-├── datasets
+├── datasets/             # Sample datasets for testing
+├── scripts/              # 1-click launch batch scripts
+├── requirements.txt      # Python dependencies
 ├── README.md
 └── .gitignore
 ```
@@ -84,12 +83,17 @@ InsightAI
 
 ## ⚙️ Installation
 
+### ⚡ Quick Start (Windows)
+
+Simply double-click `scripts/start_insightai.bat` to launch both Backend and Frontend in separate windows!
+
+Or start them manually:
+
 ### Backend
 
 ```bash
-cd backend
-
-python -m venv venv
+# In the project root
+py -3 -m venv venv
 
 venv\Scripts\activate
 
@@ -126,26 +130,25 @@ http://localhost:5173
 
 ## 📊 Current Features
 
-- Upload CSV
-- Upload Excel
-- Dashboard Generation
-- KPI Cards
-- Interactive Charts
-- Business Insights
-- Dataset Profiling
-- Data Cleaning
+- 📁 **Multi-Format Ingestion**: Upload CSV and Excel datasets (.csv, .xlsx)
+- 📈 **Interactive BI Dashboard**: Hero KPIs with profit margins, AOV, and volume metrics
+- 📉 **Time Series & Trend Analysis**: Chronological revenue & profit area/line graphs
+- 📦 **Category Breakdown**: Donut / Pie distribution charts with revenue percentage share
+- 🏆 **Product & Region Rankings**: Best performers, loss leaders, and geographic traction
+- 🎯 **Pareto (80/20) Analytics**: Analysis of catalog dependency and revenue concentration
+- ⚠️ **Anomaly & Risk Detection**: Automated flagging of negative margins and order value outliers
+- 💬 **AI Business Analyst Chatbot**: Conversational BI powered by Gemma 3 / Analytical Engine with suggested prompt chips
+- 📑 **Strategic SWOT Matrix & Executive Briefing**: Strengths, Weaknesses, Opportunities, and Threats with Print / Save PDF
+- 📋 **Dataset Profiling**: Structural health diagnostics, memory footprint, null counts, and column types
+- 🧹 **Automated Data Cleaning**: 1-click pipeline removing duplicates, imputing missing data, and exporting cleaned CSVs
 
 ---
 
 ## 🚧 Upcoming Features
 
-- 🤖 Gemma 3 AI Integration
-- 💬 Natural Language Business Queries
-- 📄 PDF Report Generation
-- 📈 Advanced Analytics
-- 📊 Multiple Dataset Comparison
-- 👤 User Authentication
-- ☁️ Cloud Deployment
+- 📊 Multiple Dataset Comparison & Merging
+- 👤 User Authentication & Role-Based Access Control
+- ☁️ Cloud Deployment (AWS / GCP / Docker Containerization)
 
 ---
 

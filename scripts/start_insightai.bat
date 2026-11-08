@@ -1,5 +1,6 @@
 @echo off
+echo Starting InsightAI Backend and Frontend...
 
-start cmd /k "cd /d D:\InsightAI\backend && call venv\Scripts\activate && uvicorn app.main:app --reload"
+start "InsightAI Backend" cmd /k "cd /d %~dp0.. && call venv\Scripts\activate && uvicorn app.main:app --reload"
 
-start cmd /k "cd /d D:\InsightAI\frontend && npm run dev"
+start "InsightAI Frontend" cmd /k "cd /d %~dp0..\frontend && npm run dev"
