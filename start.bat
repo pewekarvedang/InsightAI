@@ -21,7 +21,7 @@ for /f "tokens=5" %%a in ('netstat -aon ^| findstr :5173 ^| findstr LISTENING 2^
 )
 
 echo [1/2] Starting FastAPI Backend on port 8000...
-start "InsightAI Backend" cmd /k "cd /d %~dp0 && .\venv\Scripts\activate && uvicorn app.main:app --reload --port 8000"
+start "InsightAI Backend" cmd /k "cd /d %~dp0 && .\venv\Scripts\python.exe -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000"
 
 echo [2/2] Starting Vite Frontend on port 5173...
 start "InsightAI Frontend" cmd /k "cd /d %~dp0frontend && npm run dev"
