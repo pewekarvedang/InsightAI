@@ -15,11 +15,15 @@
 
 - 📁 **Universal Dataset Ingestion**: Robust handling of CSV and Excel (`.csv`, `.xlsx`, `.tsv`) with multi-encoding recovery (`utf-8`, `utf-8-sig`, `latin1`, `cp1252`), custom delimiters, and automatic repair of title rows and duplicate headers.
 - 💱 **Intelligent Data Sanitization**: Automatically strips currency symbols (`₹, $, €, £, ¥`), thousand-separator commas, percentages, and accounting parentheses, turning formatted text into numerical metrics.
+- 🔮 **Predictive Revenue & Demand Projections**: Forward 30/60-day statistical forecasting utilizing Holt-Winters linear exponential smoothing, damped polynomial trend regression, and expanding ~80% confidence interval bands.
+- 🎛️ **Interactive "What-If" Margin Simulator**: Real-time business scenario modeling with sliders for Base Price (±30%), Discounts (±30%), COGS inflation (±30%), and Volume Elasticity (±50%), computing projected profit, margin delta (in bps), and breakeven volume sensitivity.
+- 📊 **Period-over-Period Comparative Analytics**: Dual upload pipeline to compare two business periods (e.g. Q1 vs Q2, YoY) with variance % badges, top product gainers/decliners tables, and comparative charts.
+- 💬 **Conversational Text-to-Chart in AI Chatbot**: Context-grounded business advisor powered by **Google Gemma 4B** (`gemma3:4b` / `gemma4`) via local Ollama. Detects chart requests and dynamically streams inline Recharts (`BarChart`, `PieChart`, `AreaChart`).
+- 📑 **1-Click Executive Presentation Deck (`.pptx`)**: Generates and downloads a corporate 5-slide widescreen 16:9 PowerPoint briefing (Executive Title, KPI Matrix, Entity Rankings, SWOT Evaluation, and Strategic Roadmap) via `python-pptx`.
+- 🌐 **Live Data & Cloud Connectors**: Sync public Google Sheets links (auto-converts edit links to CSV stream) or raw web CSV URLs, pre-loaded 1-click sample business datasets, and persistent SQLite session history.
 - 🔄 **Dual Engine Intelligence**:
   - **Financial BI Mode**: Dynamic ranking of sales, net profit, profit margins, average order value (AOV), and Pareto (80/20) concentration while blacklisting false-positive technical ID/phone columns.
   - **Volume / Master Ledger Mode**: Gracefully handles non-numeric entity logs, calculating frequency distributions so dashboards never render blank.
-- 💬 **AI Business Analyst Chatbot**: Context-grounded business advisor powered by **Google Gemma 4B** (`gemma3:4b` / `gemma4`) via local Ollama. Seamlessly switches models through an in-app selector modal and includes a deterministic analytical fallback engine.
-- 📑 **Strategic Executive Briefing & SWOT**: Automated formulation of Strengths, Weaknesses, Opportunities, and Threats, ready for 1-click clipboard export or PDF printing.
 - ⚠️ **Automated Anomaly & Outlier Auditing**: Instant flagging of loss-making products and order value spikes exceeding 3.5× normal transaction thresholds.
 - 🧹 **1-Click Data Cleaning**: Automatic removal of duplicate rows, median/mode imputation of missing values, and export of cleaned CSVs.
 - 📋 **Dataset Profiling**: Complete structural audit displaying row/column counts, memory footprint, missing value ratios, and column type breakdowns.
@@ -37,18 +41,24 @@
 ```
 InsightAI Architecture
 ├── Frontend (React 19 + Vite 8 + Material UI v9 + Recharts)
-│   ├── Interactive Tabbed Navigation (Overview, Deep Analytics, AI Analyst, SWOT, Data Health)
-│   ├── Responsive Recharts (Time Series Area Chart, Category Donut, Product/Region Bars)
-│   ├── AI Analyst Chat Interface with Quick Prompts & Ollama Model Selector
-│   └── Dataset Live Preview & File Cleaning Downloader
+│   ├── Interactive Tabbed Navigation (Overview, Deep Analytics, AI Analyst, SWOT, Data Health, What-If Simulator, Comparison)
+│   ├── Responsive Recharts (Time Series Area Chart, Predictive Forecasts, Category Donut, Product/Region Bars)
+│   ├── AI Analyst Chat Interface with Dynamic Inline Text-to-Chart & Quick Prompts
+│   ├── Multi-Source Data Hub (Local Files, Google Sheets URL Sync, 1-Click Samples, SQLite History)
+│   └── 1-Click Corporate PowerPoint Deck (.pptx) & PDF Exporters
 │
-└── Backend (FastAPI + Pandas + NumPy + Ollama SDK)
-    ├── /dashboard    -> Data sanitization, column detection, metrics & SWOT synthesis
-    ├── /ai/chat      -> Ground-truth context prompt engine routed to local Gemma 4B
-    ├── /ai/status    -> Live Ollama status, active model, and installed model registry
-    ├── /ai/model     -> Runtime AI model configuration
-    ├── /clean        -> Automated data cleaning & export
-    └── /analyze      -> Instant structural dataset profiler
+└── Backend (FastAPI + Pandas + NumPy + python-pptx + SQLite + Ollama SDK)
+    ├── /dashboard            -> Data sanitization, column detection, metrics, SWOT & 30-day forecast
+    ├── /export/presentation  -> Executive 16:9 widescreen 5-slide PowerPoint deck generator
+    ├── /compare              -> Multi-dataset period-over-period variance & growth engine
+    ├── /ingest/url           -> Google Sheets & public web CSV ingestion connector
+    ├── /samples              -> Preloaded enterprise demonstration datasets
+    ├── /history              -> Persistent SQLite analysis session registry
+    ├── /ai/chat              -> Ground-truth context prompt engine with Recharts chart payloads
+    ├── /ai/status            -> Live Ollama status, active model, and installed model registry
+    ├── /ai/model             -> Runtime AI model configuration
+    ├── /clean                -> Automated data cleaning & export
+    └── /analyze              -> Instant structural dataset profiler
 ```
 
 ### Stack Breakdown
@@ -56,9 +66,9 @@ InsightAI Architecture
 | Layer | Technologies |
 | :--- | :--- |
 | **Frontend** | React 19, Vite 8, Material UI (MUI) 9, Recharts 3, Axios, React Icons |
-| **Backend** | FastAPI, Python 3.12+, Uvicorn, Pandas, NumPy, OpenPyXL |
+| **Backend** | FastAPI, Python 3.12+, Uvicorn, Pandas, NumPy, python-pptx, OpenPyXL, SQLite |
 | **AI / LLM** | Ollama, Google Gemma 4B (`gemma3:4b`), Meta Llama 3, Phi-3 |
-| **Data Formats** | CSV, TSV, XLSX, XLS |
+| **Data Formats** | CSV, TSV, XLSX, XLS, Google Sheets |
 
 ---
 
@@ -69,22 +79,26 @@ InsightAI/
 ├── app/
 │   ├── ai/
 │   │   ├── analyzer.py        # Executive report generator & prompt formatter
-│   │   ├── chatbot.py         # Conversational business analyst engine
+│   │   ├── chatbot.py         # Conversational business analyst & text-to-chart engine
 │   │   ├── llm.py             # Ollama dynamic model connector & fallback logic
 │   │   └── prompts.py         # Structured executive analysis prompts
 │   ├── services/
-│   │   ├── dashboard_service.py # Financial & volume BI metrics, SWOT, Pareto & anomaly detection
-│   │   ├── data_cleaner.py    # Auto-cleaning pipeline (deduplication & imputation)
-│   │   └── data_profiler.py   # Statistical profiling & column typing
+│   │   ├── dashboard_service.py  # Financial & volume BI metrics, SWOT, Pareto & anomaly detection
+│   │   ├── forecast_service.py   # Holt-Winters exponential smoothing & confidence band projections
+│   │   ├── deck_service.py       # Corporate widescreen 16:9 PowerPoint (.pptx) generator
+│   │   ├── comparison_service.py # Period A vs Period B variance & growth analytics
+│   │   ├── session_service.py    # Persistent SQLite session registry
+│   │   ├── data_cleaner.py       # Auto-cleaning pipeline (deduplication & imputation)
+│   │   └── data_profiler.py      # Statistical profiling & column typing
 │   ├── utils/
 │   │   └── file_manager.py    # Safe multi-encoding file loader & currency sanitizer
 │   └── main.py                # FastAPI REST endpoints & CORS configuration
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── dashboard/     # KPICards, Charts, DeepAnalytics, AIChatbot, ExecutiveReport
+│   │   │   ├── dashboard/     # KPICards, Charts, DeepAnalytics, AIChatbot, ExecutiveReport, ScenarioSimulator, DatasetComparison
 │   │   │   ├── layout/        # Navbar
-│   │   │   └── upload/        # Drag-and-drop file upload & live preview
+│   │   │   └── upload/        # Multi-tab data hub (Files, Google Sheets URL, Samples, History)
 │   │   ├── pages/             # Dashboard main page
 │   │   ├── services/          # Axios API client
 │   │   └── theme/             # Custom enterprise MUI theme
@@ -94,6 +108,9 @@ InsightAI/
 ├── screenshots/               # Dashboard preview images
 ├── scripts/                   # Auxiliary startup scripts
 ├── start.bat                  # 1-Click launcher (checks Ollama, frees ports, starts both servers)
+├── requirements.txt           # Python backend dependencies
+└── README.md
+```
 ├── requirements.txt           # Python backend dependencies
 └── README.md
 ```
@@ -172,11 +189,18 @@ InsightAI is pre-configured to use **Google Gemma 4B** (`gemma3:4b`) via Ollama.
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
 | `GET` | `/health` | Server health check |
-| `POST` | `/dashboard` | Ingest CSV/Excel, sanitize data, generate metrics, preview & SWOT |
+| `POST` | `/dashboard` | Ingest CSV/Excel, sanitize data, generate metrics, preview, SWOT & 30-day forecast |
+| `POST` | `/export/presentation` | Generate and download corporate 16:9 widescreen PowerPoint deck (.pptx) |
+| `POST` | `/compare` | Compute Period A vs Period B variance, margin shifts, and top gainers/decliners |
+| `POST` | `/ingest/url` | Ingest dataset directly from public Google Sheets or web CSV URL |
+| `GET` | `/samples` | List preloaded 1-click demonstration business datasets |
+| `POST` | `/samples/load/{key}` | Load a preloaded demonstration dataset with a single click |
+| `GET` | `/history` | Retrieve local SQLite session history of recently audited datasets |
+| `POST` | `/history/load/{id}` | Restore and reload a previously analyzed dataset session |
 | `POST` | `/analyze` | Profile dataset columns, null counts, and structural schema |
 | `POST` | `/clean` | Execute auto-cleaning pipeline and generate downloadable CSV |
 | `GET` | `/download/{file}` | Download cleaned dataset |
-| `POST` | `/ai/chat` | Query the AI Analyst with dataset context and conversation history |
+| `POST` | `/ai/chat` | Query AI Analyst with dataset context, conversation history & Recharts chart payloads |
 | `GET` | `/ai/status` | Check local Ollama connection, active model, and installed models |
 | `POST` | `/ai/model` | Change active Ollama model at runtime |
 | `POST` | `/ai/pull` | Trigger background model download via Ollama |

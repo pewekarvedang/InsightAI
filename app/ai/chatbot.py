@@ -284,14 +284,97 @@ def analytical_fallback_reply(question: str, dashboard: dict) -> dict:
         return {"answer": reply, "source": "analytical_engine", "suggested_questions": suggested}
 
 
+def detect_chart_payload(question: str, dashboard: dict):
+    """Detect if the user is asking for a visualization and generate structured
+    chart payload for inline rendering in the chat interface.
+    """
+    q = question.lower()
+    is_chart_query = any(k in q for k in [
+        "chart", "plot", "graph", "visualize", "visualization", "pie",
+        "bar", "donut", "trend", "breakdown", "distribution", "leaderboard", "show me"
+    ])
+
+    if not is_chart_query and not any(k in q for k in ["breakdown", "distribution", "rankings", "compare"]):
+        return None
+
+    is_volume = dashboard.get("metric_mode") == "volume"
+
+    # 1. Category Chart (Pie / Donut)
+    if any(k in q for k in ["category", "segment", "pie", "donut", "dept", "department"]):
+        cats = dashboard.get("sales_by_category", [])
+        if cats:
+            return {
+                "type": "pie",
+                "title": "Category Volume Share" if is_volume else "Category Revenue Contribution",
+                "data": cats[:8],
+                "dataKey": "value",
+                "nameKey": "name",
+            }
+
+    # 2. Regional Chart (Bar)
+    if any(k in q for k in ["region", "territory", "geographic", "location", "area", "zone"]):
+        regs = dashboard.get("sales_by_region", [])
+        if regs:
+            return {
+                "type": "bar",
+                "title": "Geographic Operational Distribution" if is_volume else "Regional Sales Traction",
+                "data": regs[:10],
+                "dataKey": "sales",
+                "nameKey": "name",
+                "color": "#9333ea"
+            }
+
+    # 3. Time Series Trends (Area)
+    if any(k in q for k in ["time", "trend", "monthly", "daily", "timeline", "chronological", "over time", "history"]):
+        ts = dashboard.get("time_series", [])
+        if ts:
+            return {
+                "type": "area",
+                "title": "Record Activity Trends Over Time" if is_volume else "Revenue & Profit Trends Over Time",
+                "data": ts,
+                "dataKey": "sales",
+                "nameKey": "period",
+                "color": "#2563eb"
+            }
+
+    # 4. Profitability Breakdown (Bar)
+    if any(k in q for k in ["profit", "margin", "earnings", "bottom line"]):
+        profs = dashboard.get("profit_by_product", [])
+        if profs:
+            return {
+                "type": "bar",
+                "title": "Product Net Profitability Leaderboard",
+                "data": profs[:8],
+                "dataKey": "profit",
+                "nameKey": "name",
+                "color": "#16a34a"
+            }
+
+    # 5. Product Leaderboard (Bar)
+    prods = dashboard.get("sales_by_product", [])
+    if prods:
+        return {
+            "type": "bar",
+            "title": "Top Master Entities by Frequency" if is_volume else "Top Products by Sales Revenue",
+            "data": prods[:8],
+            "dataKey": "sales",
+            "nameKey": "name",
+            "color": "#2563eb"
+        }
+
+    return None
+
+
 def ask_business_chatbot(question: str, dashboard: dict, history: list = None) -> dict:
     """Entry point for the AI Business Analyst Chatbot.
     Tries Ollama local LLM first; if unavailable, falls back to the intelligent analytical engine.
+    Automatically enriches visualization queries with interactive Recharts payloads.
     """
     if history is None:
         history = []
 
     model = get_active_model()
+    chart_payload = detect_chart_payload(question, dashboard)
 
     # Attempt local Ollama inference
     try:
@@ -311,16 +394,20 @@ def ask_business_chatbot(question: str, dashboard: dict, history: list = None) -
             options={"temperature": 0.4}
         )
         llm_reply = response["message"]["content"]
-        return {
+        res = {
             "answer": llm_reply,
             "source": f"ollama ({model})",
             "model": model,
             "suggested_questions": [
-                "What are our biggest profit opportunities?",
-                "Which product or region has the lowest margin?",
-                "Detect anomalies in this dataset"
+                "Show me a bar chart of top products",
+                "What is our profit margin breakdown?",
+                "Plot sales by region",
+                "Give me 5 strategic recommendations"
             ]
         }
+        if chart_payload:
+            res["chart"] = chart_payload
+        return res
     except Exception:
         # Check if another installed model can answer
         try:
@@ -335,16 +422,19 @@ def ask_business_chatbot(question: str, dashboard: dict, history: list = None) -
                         )
                         llm_reply = response["message"]["content"]
                         set_active_model(alt_model)
-                        return {
+                        res = {
                             "answer": llm_reply,
                             "source": f"ollama ({alt_model})",
                             "model": alt_model,
                             "suggested_questions": [
-                                "What are our biggest profit opportunities?",
-                                "Which product or region has the lowest margin?",
-                                "Detect anomalies in this dataset"
+                                "Show me a bar chart of top products",
+                                "What is our profit margin breakdown?",
+                                "Plot sales by region"
                             ]
                         }
+                        if chart_payload:
+                            res["chart"] = chart_payload
+                        return res
                     except Exception:
                         continue
         except Exception:
@@ -353,4 +443,6 @@ def ask_business_chatbot(question: str, dashboard: dict, history: list = None) -
         # Fall back to high-fidelity analytical engine
         fallback_res = analytical_fallback_reply(question, dashboard)
         fallback_res["model"] = model
+        if chart_payload:
+            fallback_res["chart"] = chart_payload
         return fallback_res

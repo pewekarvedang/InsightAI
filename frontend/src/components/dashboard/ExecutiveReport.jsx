@@ -4,6 +4,7 @@ import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Skeleton from "@mui/material/Skeleton";
+import CircularProgress from "@mui/material/CircularProgress";
 
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
@@ -13,9 +14,13 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import WarningIcon from "@mui/icons-material/Warning";
 import LightbulbIcon from "@mui/icons-material/Lightbulb";
 import ShieldIcon from "@mui/icons-material/Shield";
+import SlideshowIcon from "@mui/icons-material/Slideshow";
+
+import api from "../../services/api";
 
 export default function ExecutiveReport({ report, dashboard, loading }) {
   const [copied, setCopied] = useState(false);
+  const [exportingDeck, setExportingDeck] = useState(false);
 
   const handleCopy = () => {
     if (!report) return;
@@ -26,6 +31,37 @@ export default function ExecutiveReport({ report, dashboard, loading }) {
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleExportPresentation = async () => {
+    if (!dashboard) return;
+    setExportingDeck(true);
+    try {
+      const response = await api.post(
+        "/export/presentation",
+        {
+          dashboard,
+          file_name: dashboard.file_name || "Executive_Analysis",
+        },
+        { responseType: "blob" }
+      );
+
+      const blob = new Blob([response.data], {
+        type: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `Executive_Briefing_${new Date().toISOString().slice(0, 10)}.pptx`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Failed to export presentation deck:", err);
+    } finally {
+      setExportingDeck(false);
+    }
   };
 
   const swot = dashboard?.swot_analysis || {
@@ -91,7 +127,27 @@ export default function ExecutiveReport({ report, dashboard, loading }) {
           </Box>
         </Box>
 
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexWrap: "wrap" }}>
+          <Button
+            variant="contained"
+            size="small"
+            onClick={handleExportPresentation}
+            disabled={exportingDeck}
+            startIcon={exportingDeck ? <CircularProgress size={16} color="inherit" /> : <SlideshowIcon />}
+            sx={{
+              textTransform: "none",
+              borderRadius: 2,
+              fontWeight: 700,
+              background: "linear-gradient(135deg, #d97706 0%, #b45309 100%)",
+              color: "#ffffff",
+              "&:hover": {
+                background: "linear-gradient(135deg, #b45309 0%, #92400e 100%)",
+              },
+            }}
+          >
+            {exportingDeck ? "Generating Deck..." : "Download Slide Deck (.pptx)"}
+          </Button>
+
           <Button
             variant="outlined"
             size="small"
@@ -104,7 +160,7 @@ export default function ExecutiveReport({ report, dashboard, loading }) {
           </Button>
 
           <Button
-            variant="contained"
+            variant="outlined"
             size="small"
             onClick={handlePrint}
             startIcon={<PrintIcon />}

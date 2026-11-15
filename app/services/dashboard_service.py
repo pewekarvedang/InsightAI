@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from .data_profiler import profile_dataset
+from .forecast_service import generate_forecast
 
 METRIC_BLACKLIST_SUBSTRINGS = [
     "id", "_id", "uuid", "guid", "code", "barcode", "ean", "upc",
@@ -650,6 +651,9 @@ def generate_dashboard(df: pd.DataFrame):
             for cat, cnt in top_counts.items()
         ]
 
+    # 5. Generate Forward Forecast Projections
+    forecast_data = generate_forecast(time_series, days_forward=30)
+
     return {
         "total_revenue": total_revenue,
         "total_profit": total_profit,
@@ -667,6 +671,7 @@ def generate_dashboard(df: pd.DataFrame):
         "profit_by_region": profit_by_region,
         "sales_by_category": sales_by_category,
         "time_series": time_series,
+        "forecast": forecast_data,
         "loss_making_products": loss_making_products,
         "pareto_analysis": pareto_data,
         "anomalies": anomalies,

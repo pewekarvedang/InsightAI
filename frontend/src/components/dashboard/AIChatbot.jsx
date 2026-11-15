@@ -26,14 +26,33 @@ import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import SettingsIcon from "@mui/icons-material/Settings";
 import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
+import BarChartIcon from "@mui/icons-material/BarChart";
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  AreaChart,
+  Area,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RechartsTooltip,
+  Legend,
+} from "recharts";
 import api from "../../services/api";
+
+const CHART_COLORS = ["#2563eb", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899", "#06b6d4", "#f97316", "#64748b"];
 
 const QUICK_PROMPTS = [
   "What are our top revenue drivers?",
+  "Show bar chart of top products",
+  "Plot regional distribution chart",
   "What is our profit margin and how healthy is it?",
-  "Which regions or products are underperforming?",
+  "Show pie chart of category sales",
   "Detect anomalies and loss-making transactions",
-  "Give me 5 actionable recommendations to boost revenue",
 ];
 
 export default function AIChatbot({ dashboard }) {
@@ -156,6 +175,7 @@ export default function AIChatbot({ dashboard }) {
         role: "assistant",
         content: response.data.answer,
         source: response.data.source || "analytical_engine",
+        chart: response.data.chart || null,
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
 
@@ -476,7 +496,75 @@ export default function AIChatbot({ dashboard }) {
                       {msg.content}
                     </Typography>
                   ) : (
-                    renderFormattedText(msg.content)
+                    <>
+                      {renderFormattedText(msg.content)}
+                      {msg.chart && msg.chart.data && msg.chart.data.length > 0 && (
+                        <Box sx={{ mt: 2.5, p: 2, borderRadius: 2.5, backgroundColor: "#f8fafc", border: "1px solid #e2e8f0" }}>
+                          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.5 }}>
+                            <BarChartIcon sx={{ fontSize: 18, color: "#2563eb" }} />
+                            <Typography variant="subtitle2" fontWeight={700} color="#1e293b">
+                              {msg.chart.title || "Visual Data Analysis"}
+                            </Typography>
+                          </Box>
+                          <Box sx={{ width: "100%", height: 230 }}>
+                            <ResponsiveContainer width="100%" height="100%">
+                              {msg.chart.type === "pie" ? (
+                                <PieChart>
+                                  <Pie
+                                    data={msg.chart.data}
+                                    dataKey={msg.chart.dataKey || "value"}
+                                    nameKey={msg.chart.nameKey || "name"}
+                                    cx="50%"
+                                    cy="50%"
+                                    innerRadius={45}
+                                    outerRadius={75}
+                                    paddingAngle={3}
+                                  >
+                                    {msg.chart.data.map((_, cIdx) => (
+                                      <Cell key={cIdx} fill={CHART_COLORS[cIdx % CHART_COLORS.length]} />
+                                    ))}
+                                  </Pie>
+                                  <RechartsTooltip
+                                    formatter={(v) => [`${msg.chart.unit || ""}${Number(v).toLocaleString("en-IN")}`]}
+                                    contentStyle={{ borderRadius: 8, border: "1px solid #e2e8f0" }}
+                                  />
+                                  <Legend wrapperStyle={{ fontSize: 11 }} />
+                                </PieChart>
+                              ) : msg.chart.type === "area" ? (
+                                <AreaChart data={msg.chart.data} margin={{ top: 5, right: 15, left: 0, bottom: 5 }}>
+                                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                                  <XAxis dataKey={msg.chart.nameKey || "period"} stroke="#64748b" tick={{ fontSize: 10 }} />
+                                  <YAxis stroke="#64748b" tick={{ fontSize: 10 }} />
+                                  <RechartsTooltip
+                                    formatter={(v) => [`${msg.chart.unit || ""}${Number(v).toLocaleString("en-IN")}`]}
+                                    contentStyle={{ borderRadius: 8, border: "1px solid #e2e8f0" }}
+                                  />
+                                  <Area type="monotone" dataKey={msg.chart.dataKey || "sales"} stroke="#2563eb" fill="#bfdbfe" />
+                                </AreaChart>
+                              ) : (
+                                <BarChart data={msg.chart.data} margin={{ top: 5, right: 15, left: 0, bottom: 20 }}>
+                                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                                  <XAxis
+                                    dataKey={msg.chart.nameKey || "name"}
+                                    stroke="#64748b"
+                                    angle={-15}
+                                    textAnchor="end"
+                                    height={45}
+                                    tick={{ fontSize: 10 }}
+                                  />
+                                  <YAxis stroke="#64748b" tick={{ fontSize: 10 }} />
+                                  <RechartsTooltip
+                                    formatter={(v) => [`${msg.chart.unit || ""}${Number(v).toLocaleString("en-IN")}`]}
+                                    contentStyle={{ borderRadius: 8, border: "1px solid #e2e8f0" }}
+                                  />
+                                  <Bar dataKey={msg.chart.dataKey || "sales"} fill="#2563eb" radius={[4, 4, 0, 0]} />
+                                </BarChart>
+                              )}
+                            </ResponsiveContainer>
+                          </Box>
+                        </Box>
+                      )}
+                    </>
                   )}
                 </Paper>
 

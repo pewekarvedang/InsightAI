@@ -23,6 +23,8 @@ import SmartToyIcon from "@mui/icons-material/SmartToy";
 import DescriptionIcon from "@mui/icons-material/Description";
 import StorageIcon from "@mui/icons-material/Storage";
 import TableChartIcon from "@mui/icons-material/TableChart";
+import TuneIcon from "@mui/icons-material/Tune";
+import CompareArrowsIcon from "@mui/icons-material/CompareArrows";
 
 import Navbar from "../components/layout/Navbar";
 import Upload from "../components/upload/Upload";
@@ -33,6 +35,8 @@ import DataProfiling from "../components/dashboard/DataProfiling";
 import AIChatbot from "../components/dashboard/AIChatbot";
 import DeepAnalytics from "../components/dashboard/DeepAnalytics";
 import ExecutiveReport from "../components/dashboard/ExecutiveReport";
+import ScenarioSimulator from "../components/dashboard/ScenarioSimulator";
+import DatasetComparison from "../components/dashboard/DatasetComparison";
 
 export default function Dashboard() {
   const [dashboard, setDashboard] = useState(null);
@@ -240,6 +244,8 @@ export default function Dashboard() {
                 />
                 <Tab icon={<DescriptionIcon />} iconPosition="start" label="Executive Briefing & SWOT" />
                 <Tab icon={<StorageIcon />} iconPosition="start" label="Data Health & Auto-Clean" />
+                <Tab icon={<TuneIcon />} iconPosition="start" label="What-If Simulator" />
+                <Tab icon={<CompareArrowsIcon />} iconPosition="start" label="Period Comparison" />
               </Tabs>
             </Paper>
 
@@ -338,6 +344,12 @@ export default function Dashboard() {
 
             {/* TAB 4: Data Health & Auto-Cleaner */}
             {currentTab === 4 && <DataProfiling dashboard={dashboard} currentFile={currentFile} />}
+
+            {/* TAB 5: What-If Margin & Pricing Simulator */}
+            {currentTab === 5 && <ScenarioSimulator dashboard={dashboard} />}
+
+            {/* TAB 6: Period-over-Period Comparison */}
+            {currentTab === 6 && <DatasetComparison />}
           </div>
         )}
       </Container>
